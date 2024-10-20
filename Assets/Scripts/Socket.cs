@@ -27,10 +27,8 @@ public class WebSocketHandler
             {
                 Debug.Log("Mensagem recebida no WebSocket");
 
-                // Converte a mensagem JSON recebida em um objeto DataPeso
                 DataPeso data = JsonUtility.FromJson<DataPeso>(msg);
 
-                // Dispara o evento para notificar os assinantes (ProgressBarLooper)
                 OnMessageReceived?.Invoke(data);
             };
 
