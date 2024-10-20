@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System;
 
 public class ProgressBarLooper : MonoBehaviour
 {
@@ -38,6 +39,28 @@ public class ProgressBarLooper : MonoBehaviour
         _webSocketHandler.Start();
     }
 
+    void Update()
+    {
+        if (!Input.anyKeyDown) return;
+
+        var comando = new ComandoEsp();
+
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            comando.Opcao = 2;
+        }
+        else
+        {
+            Debug.Log("Outra tecla pressionada");
+            return;
+        }
+
+        string json = JsonUtility.ToJson(comando);
+        Debug.Log(json);      
+        _webSocketHandler.SendMsg(json);
+    }
+
+
     private void HandleWebSocketMessage(WebSocketHandler.DataPeso data)
     {
         MainThreadDispatcher.Instance().Enqueue(() =>
@@ -50,7 +73,7 @@ public class ProgressBarLooper : MonoBehaviour
     {
         if (data == null) yield return null;
 
-        string cronomentro = _cronometro.ContagemTempo(data.Ativo, data.Tempo, data.Peso);
+        string cronomentro = _cronometro.ContagemTempo(data.Ativo, data.Tempo);
 
         if (!string.IsNullOrEmpty(cronomentro))
         {
@@ -62,5 +85,16 @@ public class ProgressBarLooper : MonoBehaviour
         power.displayText.text = data.Peso.ToString("F0");
 
         yield return new WaitForSeconds(0.01f);
+    }
+}
+[Serializable]
+public class ComandoEsp
+{
+    public int Opcao;
+    public string Valor;
+
+    public ComandoEsp()
+    {
+        Opcao = 0;
     }
 }

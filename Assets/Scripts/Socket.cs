@@ -5,6 +5,7 @@ using UnityEngine;
 public class WebSocketHandler
 {
     private WebSocketServer _server;
+    private IWebSocketConnection _client;
     private bool _conectado;
     public event Action<DataPeso> OnMessageReceived;
 
@@ -21,6 +22,8 @@ public class WebSocketHandler
             {
                 _conectado = true;
                 Debug.Log("Conexão WebSocket estabelecida");
+
+                _client = ws;
             };
 
             ws.OnMessage = (msg) =>
@@ -44,7 +47,12 @@ public class WebSocketHandler
             };
         });
     }
+    public void SendMsg(string json)
+    {
+        if(_client == null) return;
 
+        _client.Send(json);
+    }
     public bool IsConnected()
     {
         return _conectado;

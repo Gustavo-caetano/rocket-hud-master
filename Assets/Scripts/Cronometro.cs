@@ -5,29 +5,33 @@ public class Cronometro
     private long _tempoInicial;
     private bool _status;
 
-    public string ContagemTempo(bool active, long tempoAtual, float peso)
+    public Cronometro()
     {
-        if (!_status && active) // de false para true -> inicia
-        {
-            _tempoInicial = tempoAtual;
-        }
-        else if (_status && active) // continua contando o tempo
-        {
-            long tempoDecorrido = tempoAtual - _tempoInicial;
-            return FormatTempo(tempoDecorrido);
-        }
-        else if (_status && !active) // de true para false -> zera a contagem
-        {
-            _tempoInicial = 0;
-        }
-
-        _status = active;
-        return FormatTempo(tempoAtual);
+        _tempoInicial = 0;
+        _status = false;
     }
 
+    public string ContagemTempo(bool active, long tempoAtual)
+    {
+        if(IniciaOuFinalizaContagem(active))
+        {
+            _tempoInicial = active? tempoAtual : 0;
+            _status = active;
+            return "";
+        }
+        if(!active) //continue não contando
+        {
+            return "";
+        }
+        long tempoDecorrido = tempoAtual - _tempoInicial;
+        return FormatTempo(tempoDecorrido);
+    }
+    public bool IniciaOuFinalizaContagem(bool active)
+    {
+        return (!_status && active) || (_status && !active); //  false -> true = inicia contagem, true -> false = finaliza contagem 
+    }
     private string FormatTempo(long tempo)
     {
-        if (tempo == 0) return "";
         TimeSpan timeSpan = TimeSpan.FromMilliseconds(tempo);
         int seconds = timeSpan.Seconds;
         int centiseconds = timeSpan.Milliseconds / 10;
