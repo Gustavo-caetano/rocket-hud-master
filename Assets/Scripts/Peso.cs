@@ -27,7 +27,10 @@ public class WeightHandler
         }
         return _currentMaxWeight;
     }
-
+    public void SetMaxWeight(float weight)
+    {
+        _currentMaxWeight = weight;
+    }
     public void ResetMaxWeight()
     {
         _currentMaxWeight = 0;

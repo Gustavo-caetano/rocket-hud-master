@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System;
+using System.Security.Cryptography;
 
 public class ProgressBarLooper : MonoBehaviour
 {
@@ -59,16 +60,32 @@ public class ProgressBarLooper : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.T))
         {
             comando.Opcao = 2;
+            SendCommand(comando);
+            return;
         }
-        else
+        else if (Input.GetKeyDown(KeyCode.C))
         {
-            Debug.Log("Outra tecla pressionada");
+            ModalWindow<InputModalWindow>.Create()
+                   .SetHeader("Calibração de balança")
+                   .SetBody("Informe o valor que deve ser incrementado ao valor de calibração da balança\nvalor padrão: 277550\n")
+                   .SetInputField((inputResult) => {
+                    if(float.TryParse(inputResult, out float val))
+                    {
+                        comando.Opcao = 1;
+                        comando.Valor = inputResult;
+                        SendCommand(comando);
+                    }
+                   })
+                   .Show();
+        }
+        else if (Input.GetKeyDown(KeyCode.P))
+        {
+            _weightHandler.SetMaxWeight(0);
+            time.uiText.text = "00:00";
             return;
         }
 
-        string json = JsonUtility.ToJson(comando);
-        Debug.Log(json);
-        _webSocketHandler.SendMsg(json);
+        
     }
 
     private void HandleWebSocketMessage(WebSocketHandler.DataPeso data)
@@ -106,8 +123,8 @@ public class ProgressBarLooper : MonoBehaviour
         _botaoStart.isHidden = true;
 
         _botaoStart.stopwatch.Start();
-        _botaoStart.remainingMs = 60000;
-        _botaoStart.durationMs = 60000;
+        _botaoStart.remainingMs = 10000;
+        _botaoStart.durationMs = 10000;
         StartCoroutine(UpdateTimer());
     }
     private IEnumerator UpdateTimer()
@@ -141,6 +158,12 @@ public class ProgressBarLooper : MonoBehaviour
         }
     }
 
+    private void SendCommand(ComandoEsp comando)
+    {
+        string json = JsonUtility.ToJson(comando);
+        Debug.Log(json);
+        _webSocketHandler.SendMsg(json);
+    }
 }
 [Serializable]
 public class ComandoEsp
