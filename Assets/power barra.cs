@@ -124,6 +124,12 @@ public class ProgressBarLooper : MonoBehaviour
 
     void HideWarning()
     {
+        if(!_webSocketHandler.IsConnected())
+        {
+            ToastUtil.ShowToastError("Nenhum dispositivo conectado!!");
+            return;
+        }
+
         _botaoStart.warningImage.SetActive(false);
         _botaoStart.startButton.gameObject.SetActive(false);
         _botaoStart.menuButton.gameObject.SetActive(false);
