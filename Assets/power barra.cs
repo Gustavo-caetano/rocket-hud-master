@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System;
-using System.Security.Cryptography;
 
 public class ProgressBarLooper : MonoBehaviour
 {
@@ -23,7 +22,8 @@ public class ProgressBarLooper : MonoBehaviour
     private Cronometro _cronometro;
     private ToggleVisibility _botaoStart;
     private CronometroScript _contagemRegressiva;
-
+    private DataBase banco;
+    private DataBase.DataTeste dadosTeste;
     void Awake()
     {
         maxPower = maxPowerObj.GetComponent<CounterText>();
@@ -46,6 +46,11 @@ public class ProgressBarLooper : MonoBehaviour
         _webSocketHandler = new WebSocketHandler("ws://0.0.0.0:15000");
         _webSocketHandler.OnMessageReceived += HandleWebSocketMessage;
         _webSocketHandler.Start();
+
+        banco = new(
+            "mongodb+srv://gustavo:OUyY3FScSj39zzAA@cluster0.5nb5xr6.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+            , "rocket"
+            , "teste");
     }
     void Start()
     {
@@ -56,7 +61,7 @@ public class ProgressBarLooper : MonoBehaviour
         if (!Input.anyKeyDown) return;
 
         var comando = new ComandoEsp();
-
+        
         if (Input.GetKeyDown(KeyCode.T))
         {
             comando.Opcao = 2;
@@ -68,13 +73,14 @@ public class ProgressBarLooper : MonoBehaviour
             ModalWindow<InputModalWindow>.Create()
                    .SetHeader("Calibração de balança")
                    .SetBody("Informe o valor que deve ser incrementado ao valor de calibração da balança\nvalor padrão: 277550\n")
-                   .SetInputField((inputResult) => {
-                    if(float.TryParse(inputResult, out float val))
-                    {
-                        comando.Opcao = 1;
-                        comando.Valor = inputResult;
-                        SendCommand(comando);
-                    }
+                   .SetInputField((inputResult) =>
+                   {
+                       if (float.TryParse(inputResult, out float val))
+                       {
+                           comando.Opcao = 1;
+                           comando.Valor = inputResult;
+                           SendCommand(comando);
+                       }
                    })
                    .Show();
         }
@@ -85,7 +91,7 @@ public class ProgressBarLooper : MonoBehaviour
             return;
         }
 
-        
+
     }
 
     private void HandleWebSocketMessage(WebSocketHandler.DataPeso data)
@@ -99,13 +105,16 @@ public class ProgressBarLooper : MonoBehaviour
     {
         if (data == null) yield return null;
 
-        string cronomentro = _cronometro.ContagemTempo(data.Ativo, data.Tempo);
+        (string cronomentro, long tempoDecorrido) = _cronometro.ContagemTempo(data.Ativo, data.Tempo);
 
+        if( _botaoStart.warningImage.activeSelf)
+        {
+            UpdateDadosDeTeste(tempoDecorrido, data);    
+        }
         if (!string.IsNullOrEmpty(cronomentro))
         {
             time.uiText.text = cronomentro;
         }
-
         maxPower.uiText.text = _weightHandler.ReturnMaxWeight(data.Peso).ToString("F0");
         progressBarImage.fillAmount = _weightHandler.CalculateFillAmount(data.Peso);
         power.displayText.text = data.Peso.ToString("F0");
@@ -122,14 +131,16 @@ public class ProgressBarLooper : MonoBehaviour
         cronometroObj.SetActive(true);
         _botaoStart.isHidden = true;
 
+        _botaoStart.stopwatch.Reset();
         _botaoStart.stopwatch.Start();
         _botaoStart.remainingMs = 10000;
-        _botaoStart.durationMs = 10000;
+        _botaoStart.durationMs = _botaoStart.remainingMs;
         StartCoroutine(UpdateTimer());
     }
+
     private IEnumerator UpdateTimer()
     {
-        while (_botaoStart.remainingMs > 0)
+        while (_botaoStart.remainingMs > 0 && cronometroObj.activeSelf)
         {
             _botaoStart.remainingMs = _botaoStart.durationMs - _botaoStart.stopwatch.ElapsedMilliseconds;
 
@@ -144,8 +155,7 @@ public class ProgressBarLooper : MonoBehaviour
             {
                 _contagemRegressiva.cronometroTexto.text = "00:00";
                 cronometroObj.SetActive(false);
-                _botaoStart.stopwatch.Reset();
-
+            
                 var comando = new ComandoEsp
                 {
                     Opcao = 3
@@ -163,6 +173,33 @@ public class ProgressBarLooper : MonoBehaviour
         string json = JsonUtility.ToJson(comando);
         Debug.Log(json);
         _webSocketHandler.SendMsg(json);
+    }
+
+    private void UpdateDadosDeTeste(long tempoDecorrido, WebSocketHandler.DataPeso data)
+    {
+        switch (tempoDecorrido)
+        {
+            case 1:
+                dadosTeste = new()
+                {
+                    Registros = new()
+                };
+                break;
+            case 2:
+                dadosTeste.PesoMaximo = _weightHandler.ReturnMaxWeight();
+
+                banco.InsertDocument(dadosTeste);
+                break;
+            case > 2:
+                dadosTeste.Tempo = tempoDecorrido;
+                dadosTeste.Registros.Add(new DataBase.Registro {
+                    Tempo = tempoDecorrido,
+                    Peso = data.Peso
+                });
+                break;
+            default:
+                break;
+        }
     }
 }
 [Serializable]

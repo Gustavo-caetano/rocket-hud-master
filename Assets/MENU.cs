@@ -5,6 +5,7 @@ public class MenuAndSubmenuController : MonoBehaviour
 {
     public GameObject menuImage; // Arraste a UI Image do menu principal aqui
     public GameObject submenuImage; // Arraste a UI Image do submenu aqui
+     public GameObject timer; 
     public Button menuButton; // Arraste o botão do menu principal que abre o menu
     public Button submenuButton; // Arraste o botão do menu que abre o submenu
 
@@ -35,6 +36,7 @@ public class MenuAndSubmenuController : MonoBehaviour
             {
                 CloseMenu();
             }
+            timer.SetActive(false);
         }
     }
 
@@ -57,7 +59,7 @@ public class MenuAndSubmenuController : MonoBehaviour
     void CloseSubmenu()
     {
         submenuImage.SetActive(false);
-        menuImage.SetActive(true); // Retorna para o menu principal
+        menuImage.SetActive(true); // Retorna para o menu principal;
         isMenuOpen = true;
         isSubmenuOpen = false;
     }

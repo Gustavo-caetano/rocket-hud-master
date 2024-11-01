@@ -3,11 +3,13 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
 public class DataBase
 {
 
     private static IMongoCollection<BsonDocument> _collection;
+
 
     public DataBase(string url, string databaseName, string collection)
     {
@@ -31,12 +33,34 @@ public class DataBase
             Debug.LogError($"Erro ao inserir documento: {ex.Message}");
         }
     }
+    public void SalvarDadosEmJson(DataTeste dados)
+    {
+        string caminhoArquivo = @"C:\Users\gustt\OneDrive\Documentos\testefoguete\dados.json";
+        try
+        {
+            string json = JsonUtility.ToJson(dados);
 
-    [Serializable]
+            File.WriteAllText(caminhoArquivo, json);
+
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("Erro ao salvar os dados: " + ex.Message);
+        }
+    }
+
+    [System.Serializable]
+    public class Registro
+    {
+        public long Tempo;
+        public float Peso;
+    }
+
+    [System.Serializable]
     public class DataTeste
     {
-        public long Tempo { get; set; }
-        public float PesoMaximo { get; set; }
-        public List<(long, float)> Registros { get; set; }
+        public long Tempo;
+        public float PesoMaximo;
+        public List<Registro> Registros;
     }
 }

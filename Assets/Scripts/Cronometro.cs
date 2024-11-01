@@ -11,24 +11,22 @@ public class Cronometro
         _status = false;
     }
 
-    public string ContagemTempo(bool active, long tempoAtual)
+    public (string, long) ContagemTempo(bool active, long tempoAtual)
     {
-        if(IniciaOuFinalizaContagem(active))
+        int opcao = Utils.IniciaOuFinalizaContagem(active, _status);
+        
+        if(opcao != 0)
         {
             _tempoInicial = active? tempoAtual : 0;
             _status = active;
-            return "";
+            return ("", opcao);
         }
         if(!active) //continue não contando
         {
-            return "";
+            return ("", opcao);
         }
         long tempoDecorrido = tempoAtual - _tempoInicial;
-        return FormatTempo(tempoDecorrido);
-    }
-    public bool IniciaOuFinalizaContagem(bool active)
-    {
-        return (!_status && active) || (_status && !active); //  false -> true = inicia contagem, true -> false = finaliza contagem 
+        return (FormatTempo(tempoDecorrido), tempoDecorrido);
     }
     private string FormatTempo(long tempo)
     {
