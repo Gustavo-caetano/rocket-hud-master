@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System;
+using System.Collections.Generic;
 
 public class ProgressBarLooper : MonoBehaviour
 {
@@ -188,7 +189,11 @@ public class ProgressBarLooper : MonoBehaviour
             case 1:
                 dadosTeste = new()
                 {
-                    Registros = new()
+                    Registros = new List<DataBase.Registro> {new()
+                    {
+                        Tempo = tempoDecorrido,
+                        Peso = data.Peso
+                    }}
                 };
                 break;
             case 2:
