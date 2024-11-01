@@ -31,6 +31,7 @@ public class DataBase
         catch (Exception ex)
         {
             Debug.LogError($"Erro ao inserir documento: {ex.Message}");
+            SalvarDadosEmJson(data);
             ToastUtil.ShowToastError("Erro ao inserir documento no banco");
         }
     }
