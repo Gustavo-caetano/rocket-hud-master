@@ -21,7 +21,7 @@ public class WebSocketHandler
             ws.OnOpen = () =>
             {
                 _conectado = true;
-                Debug.Log("Conexão WebSocket estabelecida");
+                Debug.Log("Conexão WebSocket estabelecida: "+ _conectado);
 
                 _client = ws;
             };
@@ -38,7 +38,7 @@ public class WebSocketHandler
             ws.OnClose = () =>
             {
                 _conectado = false;
-                Debug.Log("Conexão WebSocket fechada");
+                Debug.Log("Conexão WebSocket fechada" + _conectado);
             };
 
             ws.OnError = (ex) =>

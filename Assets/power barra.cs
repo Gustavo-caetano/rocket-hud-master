@@ -25,6 +25,7 @@ public class ProgressBarLooper : MonoBehaviour
     private CronometroScript _contagemRegressiva;
     private DataBase banco;
     private DataBase.DataTeste dadosTeste;
+
     void Awake()
     {
         maxPower = maxPowerObj.GetComponent<CounterText>();
@@ -62,7 +63,7 @@ public class ProgressBarLooper : MonoBehaviour
         if (!Input.anyKeyDown) return;
 
         var comando = new ComandoEsp();
-        
+
         if (Input.GetKeyDown(KeyCode.T))
         {
             comando.Opcao = 2;
@@ -108,9 +109,9 @@ public class ProgressBarLooper : MonoBehaviour
 
         (string cronomentro, long tempoDecorrido) = _cronometro.ContagemTempo(data.Ativo, data.Tempo);
 
-        if( _botaoStart.warningImage.activeSelf)
+        if (_botaoStart.warningImage.activeSelf)
         {
-            UpdateDadosDeTeste(tempoDecorrido, data);    
+            UpdateDadosDeTeste(tempoDecorrido, data);
         }
         if (!string.IsNullOrEmpty(cronomentro))
         {
@@ -125,7 +126,7 @@ public class ProgressBarLooper : MonoBehaviour
 
     void HideWarning()
     {
-        if(!_webSocketHandler.IsConnected())
+        if (!_webSocketHandler.IsConnected())
         {
             ToastUtil.ShowToastError("Nenhum dispositivo conectado!!");
             return;
@@ -162,7 +163,7 @@ public class ProgressBarLooper : MonoBehaviour
             {
                 _contagemRegressiva.cronometroTexto.text = "00:00";
                 cronometroObj.SetActive(false);
-            
+
                 var comando = new ComandoEsp
                 {
                     Opcao = 3
@@ -203,7 +204,8 @@ public class ProgressBarLooper : MonoBehaviour
                 break;
             case > 2:
                 dadosTeste.Tempo = tempoDecorrido;
-                dadosTeste.Registros.Add(new DataBase.Registro {
+                dadosTeste.Registros.Add(new DataBase.Registro
+                {
                     Tempo = tempoDecorrido,
                     Peso = data.Peso
                 });
